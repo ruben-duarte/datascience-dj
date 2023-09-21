@@ -2,6 +2,7 @@ from django.db import models
 from products.models import Product
 from customers.models import Customer
 from profiles.models import Profile
+from django.utils   import timezone
 
 # Create your models here.
 class Position(models.Model):
@@ -29,6 +30,23 @@ class Sale(models.Model):
 
     def __str__(self):
         return f"sales for the amount of ${self.total_price}"
+    
+    def save(self, *args, **kwargs):
+        if self.transaction_id == "":
+            self.transaction_id = ' '
+        if self.created is None:
+            self.created = timezone.now()
+        return super().save(*args, **kwargs)
+    
+    def get_positions(self):
+        return self.positions.all()
 
 class CSV(models.Model):
-    pass
+    file_name = models.FileField(upload_to='csvs') #check csvs or csv
+    activated = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.file_name)  #1:03 minutes
+    
